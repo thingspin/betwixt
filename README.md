@@ -14,7 +14,7 @@ The OMA Lightweight M2M enabler includes device management and service enablemen
 package main
 
 import (
-	"github.com/zubairhamed/betwixt"
+    "github.com/zubairhamed/betwixt"
 	"github.com/zubairhamed/betwixt/examples"
 	"github.com/zubairhamed/betwixt/examples/objects"
 )

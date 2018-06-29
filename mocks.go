@@ -101,18 +101,18 @@ func (o *TestDeviceObject) OnRead(instanceId int, resourceId int, req Lwm2mReque
 }
 
 func (o *TestDeviceObject) OnWrite(instanceId int, resourceId int, req Lwm2mRequest) Lwm2mResponse {
-	val := req.GetMessage().Payload
+	//sooskim val := req.GetMessage().Payload
 
 	switch resourceId {
 	case 13:
 		break
 
 	case 14:
-		o.utcOffset = val.String()
+		//sooskim o.utcOffset = val.String()
 		break
 
 	case 15:
-		o.timeZone = val.String()
+		//sooskim o.timeZone = val.String()
 		break
 
 	default:

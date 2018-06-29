@@ -182,7 +182,7 @@ type Lwm2mRequest interface {
 	GetPath() string
 	GetMessage() *canopus.Message
 	GetOperationType() OperationType
-	GetCoapRequest() canopus.CoapRequest
+	GetCoapRequest() *canopus.CoapRequest
 }
 
 // Lwm2mResponse interface represents an outgoing response to a server
