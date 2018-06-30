@@ -1,8 +1,8 @@
 ## Betwixt - A LWM2M Client and Server in Go
-[![GoDoc](https://godoc.org/github.com/zubairhamed/betwixt?status.svg)](https://godoc.org/github.com/zubairhamed/betwixt)
-[![Build Status](https://drone.io/github.com/zubairhamed/betwixt/status.png)](https://drone.io/github.com/zubairhamed/betwixt/latest)
+[![GoDoc](https://godoc.org/github.com/thingspin/betwixt?status.svg)](https://godoc.org/github.com/thingspin/betwixt)
+[![Build Status](https://drone.io/github.com/thingspin/betwixt/status.png)](https://drone.io/github.com/thingspin/betwixt/latest)
 [![Coverage Status](https://coveralls.io/repos/zubairhamed/betwixt/badge.svg?branch=master)](https://coveralls.io/r/zubairhamed/betwixt?branch=master)
-[![Go Report Card](https://goreportcard.com/badge/github.com/zubairhamed/betwixt)](https://goreportcard.com/report/github.com/zubairhamed/betwixt)
+[![Go Report Card](https://goreportcard.com/badge/github.com/thingspin/betwixt)](https://goreportcard.com/report/github.com/thingspin/betwixt)
 
 #### Betwixt is a Lightweight M2M implementation written in Go
 OMA Lightweight M2M is a protocol from the Open Mobile Alliance for M2M or IoT device management. Lightweight M2M enabler defines the application layer communication protocol between a LWM2M Server and a LWM2M Client, which is located in a LWM2M Device. 
@@ -14,9 +14,9 @@ The OMA Lightweight M2M enabler includes device management and service enablemen
 package main
 
 import (
-	"github.com/zubairhamed/betwixt"
-	"github.com/zubairhamed/betwixt/examples"
-	"github.com/zubairhamed/betwixt/examples/objects"
+	"github.com/thingspin/betwixt"
+	"github.com/thingspin/betwixt/examples"
+	"github.com/thingspin/betwixt/examples/objects"
 )
 
 func main() {
@@ -61,7 +61,7 @@ func setupResources(client betwixt.LWM2MClient, reg betwixt.Registry) {
 ### Implementing a LWM2M Object (LWM2M 'Device' Object)
 ```go
 import (
-	. "github.com/zubairhamed/betwixt"
+	. "github.com/thingspin/betwixt"
 	"time"
 )
 
@@ -204,8 +204,8 @@ func NewExampleDeviceObject(reg Registry) *DeviceObject {
 package main
 
 import (
-	"github.com/zubairhamed/betwixt"
-	. "github.com/zubairhamed/betwixt/examples/server"
+	"github.com/thingspin/betwixt"
+	. "github.com/thingspin/betwixt/examples/server"
 )
 
 func main() {

@@ -1,7 +1,7 @@
 package objects
 
 import (
-	. "github.com/zubairhamed/betwixt"
+	. "github.com/thingspin/betwixt"
 )
 
 type SecurityObject struct {

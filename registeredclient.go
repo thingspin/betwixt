@@ -6,7 +6,7 @@ import (
 	"net"
 	"time"
 
-	. "github.com/zubairhamed/canopus"
+	. "github.com/thingspin/canopus"
 )
 
 // Returns a new instance of DefaultRegisteredClient implementing RegisteredClient

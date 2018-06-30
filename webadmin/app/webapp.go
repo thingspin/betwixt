@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/zenazn/goji"
-	"github.com/zubairhamed/betwixt"
+	"github.com/thingspin/betwixt"
 )
 
 func NewWebApp(store betwixt.Store, cfg betwixt.ServerConfig) *BetwixtWebApp {

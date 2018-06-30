@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/kylelemons/go-gypsy/yaml"
-	"github.com/zubairhamed/betwixt"
-	"github.com/zubairhamed/betwixt/webadmin/app"
+	"github.com/thingspin/betwixt"
+	"github.com/thingspin/betwixt/webadmin/app"
 )
 
 func main() {
