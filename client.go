@@ -3,10 +3,11 @@ package betwixt
 import (
 	"errors"
 	"log"
+
 	"github.com/thingspin/canopus"
 )
 
-// NewLWM2MClient instantiates a new instance of LWM2M Client
+// NewLwm2mClient instantiates a new instance of LWM2M Client
 func NewLwm2mClient(name, local, remote string, registry Registry) LWM2MClient {
 	server := canopus.NewServer()
 
@@ -39,14 +40,14 @@ type DefaultLWM2MClient struct {
 	evtOnError   FnOnError
 }
 
-// Registers this client to a LWM2M Server instance
+// Register this client to a LWM2M Server instance
 // name must be unique and be less than 10 characers
 func (c *DefaultLWM2MClient) Register(name string) (string, error) {
 	if len(name) > 10 {
 		return "", errors.New("Client name can not exceed 10 characters")
 	}
 
-	req := canopus.NewRequest(canopus.MessageConfirmable, canopus.Post, canopus.GenerateMessageID())
+	req := canopus.NewRequest(canopus.MessageConfirmable, canopus.Post)
 	req.SetStringPayload(BuildModelResourceStringPayload(c.enabledObjects))
 	req.SetRequestURI("/rd")
 	req.SetURIQuery("ep", name)
@@ -83,7 +84,7 @@ func (c *DefaultLWM2MClient) GetRegistry() Registry {
 
 // Unregisters this client from a LWM2M server which was previously registered
 func (c *DefaultLWM2MClient) Deregister() {
-	req := canopus.NewRequest(canopus.MessageConfirmable, canopus.Delete, canopus.GenerateMessageID())
+	req := canopus.NewRequest(canopus.MessageConfirmable, canopus.Delete)
 
 	req.SetRequestURI(c.path)
 	_, err := c.coapServer.Send(req)

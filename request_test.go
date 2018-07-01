@@ -1,13 +1,14 @@
 package betwixt
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/thingspin/canopus"
-	"testing"
 )
 
 func TestDefaultRequestObject(t *testing.T) {
-	coapReq := canopus.NewRequest(canopus.MessageConfirmable, canopus.CoapCodeChanged, 12345)
+	coapReq := canopus.NewRequest(canopus.MessageConfirmable, canopus.CoapCodeChanged)
 	coapReq.SetRequestURI("/rd")
 
 	def := Default(coapReq, OPERATIONTYPE_REGISTER)
