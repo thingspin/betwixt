@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/thingspin/betwixt",
-	"GoVersion": "go1.7",
+	"GoVersion": "go1.10",
 	"Deps": [
 		{
 			"ImportPath": "github.com/davecgh/go-spew/spew",
@@ -17,7 +17,7 @@
 		},
 		{
 			"ImportPath": "github.com/thingspin/canopus",
-			"Rev": "3b48eb83f65e618976341e213aa3bf4c3d5fbcfc"
+			"Rev": "cfa04dcc79cf85d5e2223094597157fa46356bb0"
 		}
 	]
 }
