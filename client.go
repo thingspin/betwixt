@@ -10,10 +10,12 @@ import (
 // NewLWM2MClient instantiates a new instance of LWM2M Client
 func NewLwm2mClient(name, local, remote string, registry Registry) LWM2MClient {
 	server := canopus.NewServer()
+	conn, _ := canopus.Dial("")
 
 	// Create Mandatory
 	c := &DefaultLWM2MClient{
 		coapServer:     server,
+		coapConn:       conn,
 		enabledObjects: make(map[LWM2MObjectType]Object),
 		registry:       registry,
 	}
@@ -28,6 +30,7 @@ func NewLwm2mClient(name, local, remote string, registry Registry) LWM2MClient {
 
 type DefaultLWM2MClient struct {
 	coapServer     canopus.CoapServer
+	coapConn       canopus.Connection
 	registry       Registry
 	enabledObjects map[LWM2MObjectType]Object
 	path           string
@@ -40,7 +43,7 @@ type DefaultLWM2MClient struct {
 	evtOnError   FnOnError
 }
 
-// Registers this client to a LWM2M Server instance
+// Register this client to a LWM2M Server instance
 // name must be unique and be less than 10 characers
 func (c *DefaultLWM2MClient) Register(name string) (string, error) {
 	if len(name) > 10 {
@@ -52,7 +55,7 @@ func (c *DefaultLWM2MClient) Register(name string) (string, error) {
 	req.SetRequestURI("/rd")
 	req.SetURIQuery("ep", name)
 
-	resp, err := c.coapServer.Send(req)
+	resp, err := c.coapConn.Send(req)
 	path := ""
 	if err != nil {
 		return "", err
@@ -87,7 +90,7 @@ func (c *DefaultLWM2MClient) Deregister() {
 	req := canopus.NewRequest(canopus.MessageConfirmable, canopus.Delete)
 
 	req.SetRequestURI(c.path)
-	_, err := c.coapServer.Send(req)
+	_, err := c.coapConn.Send(req)
 
 	if err != nil {
 		log.Println(err)
@@ -178,7 +181,7 @@ func (c *DefaultLWM2MClient) Start() {
 	s.Post("/:obj/:inst/:rsrc", c.handleExecuteRequest)
 	s.Post("/:obj/:inst", c.handleCreateRequest)
 
-	c.coapServer.Start()
+	c.coapServer.ListenAndServe("")
 }
 
 // Handles LWM2M Create Requests (not to be mistaken for/not the same as  CoAP PUT)
