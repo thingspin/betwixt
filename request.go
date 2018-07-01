@@ -22,15 +22,16 @@ func (r *DefaultRequest) GetPath() string {
 }
 
 func (r *DefaultRequest) GetMessage() *canopus.Message {
-	return r.coap.GetMessage()
+	m := r.coap.GetMessage() //sooskim
+	return &m
 }
 
 func (r *DefaultRequest) GetOperationType() OperationType {
 	return r.op
 }
 
-func (r *DefaultRequest) GetCoapRequest() canopus.CoapRequest {
-	return r.coap
+func (r *DefaultRequest) GetCoapRequest() *canopus.CoapRequest {
+	return &r.coap
 }
 
 func Nil(op OperationType) Lwm2mRequest {
@@ -55,6 +56,6 @@ func (r *NilRequest) GetOperationType() OperationType {
 	return r.op
 }
 
-func (r *NilRequest) GetCoapRequest() canopus.CoapRequest {
+func (r *NilRequest) GetCoapRequest() *canopus.CoapRequest {
 	return nil
 }

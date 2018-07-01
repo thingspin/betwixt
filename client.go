@@ -7,12 +7,15 @@ import (
 	. "github.com/thingspin/canopus"
 )
 
-// NewLWM2MClient instantiates a new instance of LWM2M Client
+// NewLwm2mClient instantiates a new instance of LWM2M Client
 func NewLwm2mClient(name, local, remote string, registry Registry) LWM2MClient {
-	coapServer := NewServer(name, local, remote)
+	conn, _ := Dial(remote)
+	//coapServer := NewServer(name, local, remote)
+	coapServer := NewServer()
 
 	// Create Mandatory
 	c := &DefaultLWM2MClient{
+		conn:           conn,
 		coapServer:     coapServer,
 		enabledObjects: make(map[LWM2MObjectType]Object),
 		registry:       registry,
@@ -26,7 +29,9 @@ func NewLwm2mClient(name, local, remote string, registry Registry) LWM2MClient {
 	return c
 }
 
+// DefaultLWM2MClient is client default.
 type DefaultLWM2MClient struct {
+	conn           Connection
 	coapServer     CoapServer
 	registry       Registry
 	enabledObjects map[LWM2MObjectType]Object
@@ -40,18 +45,21 @@ type DefaultLWM2MClient struct {
 	evtOnError   FnOnError
 }
 
-// Registers this client to a LWM2M Server instance
+// Register this client to a LWM2M Server instance
 // name must be unique and be less than 10 characers
 func (c *DefaultLWM2MClient) Register(name string) (string, error) {
 	if len(name) > 10 {
 		return "", errors.New("Client name can not exceed 10 characters")
 	}
 
-	req := NewRequest(MessageConfirmable, Post, GenerateMessageID())
+	//req := NewRequest(MessageConfirmable, Post, GenerateMessageID())
+	req := NewRequest(MessageConfirmable, Post)
 	req.SetStringPayload(BuildModelResourceStringPayload(c.enabledObjects))
 	req.SetRequestURI("/rd")
 	req.SetURIQuery("ep", name)
-	resp, err := c.coapServer.Send(req)
+
+	resp, err := c.conn.Send(req)
+
 	path := ""
 	if err != nil {
 		return "", err
@@ -63,7 +71,7 @@ func (c *DefaultLWM2MClient) Register(name string) (string, error) {
 	return path, nil
 }
 
-// Sets/Defines an Enabler for a given LWM2M Object Type
+// SetEnabler Sets/Defines an Enabler for a given LWM2M Object Type
 func (c *DefaultLWM2MClient) SetEnabler(t LWM2MObjectType, e ObjectEnabler) {
 	_, ok := c.enabledObjects[t]
 	if ok {
@@ -71,22 +79,22 @@ func (c *DefaultLWM2MClient) SetEnabler(t LWM2MObjectType, e ObjectEnabler) {
 	}
 }
 
-// Returns a list of LWM2M Enabled Objects
+// GetEnabledObjects Returns a list of LWM2M Enabled Objects
 func (c *DefaultLWM2MClient) GetEnabledObjects() map[LWM2MObjectType]Object {
 	return c.enabledObjects
 }
 
-// Returns the registry used for looking up LWM2M object type definitions
+// GetRegistry Returns the registry used for looking up LWM2M object type definitions
 func (c *DefaultLWM2MClient) GetRegistry() Registry {
 	return c.registry
 }
 
-// Unregisters this client from a LWM2M server which was previously registered
+// Deregister this client from a LWM2M server which was previously registered
 func (c *DefaultLWM2MClient) Deregister() {
-	req := NewRequest(MessageConfirmable, Delete, GenerateMessageID())
+	req := NewRequest(MessageConfirmable, Delete /*, GenerateMessageID()*/)
 
 	req.SetRequestURI(c.path)
-	_, err := c.coapServer.Send(req)
+	_, err := c.conn.Send(req)
 
 	if err != nil {
 		log.Println(err)
@@ -150,7 +158,7 @@ func (c *DefaultLWM2MClient) validate() {
 
 }
 
-// Starts up the LWM2M client, listens to incoming requests and fires the OnStart event
+// Start up the LWM2M client, listens to incoming requests and fires the OnStart event
 func (c *DefaultLWM2MClient) Start() {
 	c.validate()
 
@@ -161,58 +169,59 @@ func (c *DefaultLWM2MClient) Start() {
 		}
 	})
 
-	s.OnObserve(func(resource string, msg *Message) {
+	s.OnObserve(func(resource string, msg Message) {
 		log.Println("Observe Requested")
 	})
+	/*
+		s.Get("/:obj/:inst/:rsrc", c.handleReadRequest)
+		s.Get("/:obj/:inst", c.handleReadRequest)
+		s.Get("/:obj", c.handleReadRequest)
 
-	s.Get("/:obj/:inst/:rsrc", c.handleReadRequest)
-	s.Get("/:obj/:inst", c.handleReadRequest)
-	s.Get("/:obj", c.handleReadRequest)
+		s.Put("/:obj/:inst/:rsrc", c.handleWriteRequest)
+		s.Put("/:obj/:inst", c.handleWriteRequest)
 
-	s.Put("/:obj/:inst/:rsrc", c.handleWriteRequest)
-	s.Put("/:obj/:inst", c.handleWriteRequest)
+		s.Delete("/:obj/:inst", c.handleDeleteRequest)
 
-	s.Delete("/:obj/:inst", c.handleDeleteRequest)
+		s.Post("/:obj/:inst/:rsrc", c.handleExecuteRequest)
+		s.Post("/:obj/:inst", c.handleCreateRequest)
 
-	s.Post("/:obj/:inst/:rsrc", c.handleExecuteRequest)
-	s.Post("/:obj/:inst", c.handleCreateRequest)
-
-	c.coapServer.Start()
+		c.coapServer.Start()
+	*/
 }
 
 // Handles LWM2M Create Requests (not to be mistaken for/not the same as  CoAP PUT)
-func (c *DefaultLWM2MClient) handleCreateRequest(req CoapRequest) CoapResponse {
+func (c *DefaultLWM2MClient) handleCreateRequest(req CoapRequest) Response {
 	log.Println("Create Request")
 	attrResource := req.GetAttribute("rsrc")
 	objectId := req.GetAttributeAsInt("obj")
-	instanceId := req.GetAttributeAsInt("inst")
+	//sooskim instanceId := req.GetAttributeAsInt("inst")
 
-	var resourceId = -1
+	//sooskim var resourceId = -1
 
 	if attrResource != "" {
-		resourceId = req.GetAttributeAsInt("rsrc")
+		//sooskim resourceId = req.GetAttributeAsInt("rsrc")
 	}
 
 	t := LWM2MObjectType(objectId)
 	obj := c.GetObject(t)
 	enabler := obj.GetEnabler()
 
-	msg := NewMessageOfType(MessageAcknowledgment, req.GetMessage().MessageID)
-	msg.Token = req.GetMessage().Token
-	msg.Payload = NewEmptyPayload()
+	msg := NewMessageOfType(MessageAcknowledgment, req.GetMessage().GetMessageId(), NewEmptyPayload())
+	//sooskim msg.Token = req.GetMessage().Token
+	//sooskim msg.Payload = NewEmptyPayload()
 
 	if enabler != nil {
-		lwReq := Default(req, OPERATIONTYPE_CREATE)
-		response := enabler.OnCreate(instanceId, resourceId, lwReq)
-		msg.Code = response.GetResponseCode()
+		//sooskim lwReq := Default(req, OPERATIONTYPE_CREATE)
+		//sooskim response := enabler.OnCreate(instanceId, resourceId, lwReq)
+		//sooskim msg.Code = response.GetResponseCode()
 	} else {
-		msg.Code = CoapCodeMethodNotAllowed
+		//sooskim msg.Code = CoapCodeMethodNotAllowed
 	}
 	return NewResponseWithMessage(msg)
 }
 
 // Handles LWM2M Read Requests (not to be mistaken for/not the same as  CoAP GET)
-func (c *DefaultLWM2MClient) handleReadRequest(req CoapRequest) CoapResponse {
+func (c *DefaultLWM2MClient) handleReadRequest(req CoapRequest) Response {
 	attrResource := req.GetAttribute("rsrc")
 	objectId := req.GetAttributeAsInt("obj")
 	instanceId := req.GetAttributeAsInt("inst")
@@ -227,8 +236,8 @@ func (c *DefaultLWM2MClient) handleReadRequest(req CoapRequest) CoapResponse {
 	obj := c.GetObject(t)
 	enabler := obj.GetEnabler()
 
-	msg := NewMessageOfType(MessageAcknowledgment, req.GetMessage().MessageID)
-	msg.Token = req.GetMessage().Token
+	msg := NewMessageOfType(MessageAcknowledgment, req.GetMessage().GetMessageId(), NewEmptyPayload())
+	//sooskim msg.Token = req.GetMessage().Token
 
 	if enabler != nil {
 		model := obj.GetDefinition()
@@ -236,30 +245,30 @@ func (c *DefaultLWM2MClient) handleReadRequest(req CoapRequest) CoapResponse {
 
 		if resource == nil {
 			// TODO: Return TLV of Object Instance
-			msg.Code = CoapCodeNotFound
+			//sooskim msg.Code = CoapCodeNotFound
 		} else {
 			if !IsReadableResource(resource) {
-				msg.Code = CoapCodeMethodNotAllowed
+				//sooskim msg.Code = CoapCodeMethodNotAllowed
 			} else {
 				lwReq := Default(req, OPERATIONTYPE_READ)
 				response := enabler.OnRead(instanceId, resourceId, lwReq)
 
 				val := response.GetResponseValue()
-				msg.Code = response.GetResponseCode()
+				//sooskim msg.Code = response.GetResponseCode()
 
 				msg.AddOption(OptionContentFormat, MediaTypeFromValue(val))
-				b := EncodeValue(resource.GetId(), resource.MultipleValuesAllowed(), val)
-				msg.Payload = NewBytesPayload(b)
+				//sooskim b := EncodeValue(resource.GetId(), resource.MultipleValuesAllowed(), val)
+				//sooskim msg.Payload = NewBytesPayload(b)
 			}
 		}
 	} else {
-		msg.Code = CoapCodeMethodNotAllowed
+		//sooskim msg.Code = CoapCodeMethodNotAllowed
 	}
 	return NewResponseWithMessage(msg)
 }
 
 // Handles LWM2M Delete Requests (not to be mistaken for/not the same as  CoAP DELETE)
-func (c *DefaultLWM2MClient) handleDeleteRequest(req CoapRequest) CoapResponse {
+func (c *DefaultLWM2MClient) handleDeleteRequest(req CoapRequest) Response {
 	log.Println("Delete Request")
 	objectId := req.GetAttributeAsInt("obj")
 	instanceId := req.GetAttributeAsInt("inst")
@@ -267,17 +276,18 @@ func (c *DefaultLWM2MClient) handleDeleteRequest(req CoapRequest) CoapResponse {
 	t := LWM2MObjectType(objectId)
 	enabler := c.GetObject(t).GetEnabler()
 
-	msg := NewMessageOfType(MessageAcknowledgment, req.GetMessage().MessageID)
-	msg.Token = req.GetMessage().Token
-	msg.Payload = NewEmptyPayload()
+	msg := NewMessageOfType(MessageAcknowledgment, req.GetMessage().GetMessageId(), NewEmptyPayload())
+	//sooskim msg.Token = req.GetMessage().Token
+	//sooskim msg.Payload = NewEmptyPayload()
 
 	if enabler != nil {
 		lwReq := Default(req, OPERATIONTYPE_DELETE)
 
 		response := enabler.OnDelete(instanceId, lwReq)
-		msg.Code = response.GetResponseCode()
+		//sooskim msg.Code = response.GetResponseCode()
+		msg.AddOption(OptionAccept, response.GetResponseCode()) //sooskim
 	} else {
-		msg.Code = CoapCodeMethodNotAllowed
+		//sooskim msg.Code = CoapCodeMethodNotAllowed
 	}
 	return NewResponseWithMessage(msg)
 }
@@ -291,7 +301,7 @@ func (c *DefaultLWM2MClient) handleObserveRequest() {
 }
 
 // Handles LWM2M Write Requests (not to be mistaken for/not the same as  CoAP POST)
-func (c *DefaultLWM2MClient) handleWriteRequest(req CoapRequest) CoapResponse {
+func (c *DefaultLWM2MClient) handleWriteRequest(req CoapRequest) Response {
 	log.Println("Write Request")
 	attrResource := req.GetAttribute("rsrc")
 	objectId := req.GetAttributeAsInt("obj")
@@ -307,33 +317,34 @@ func (c *DefaultLWM2MClient) handleWriteRequest(req CoapRequest) CoapResponse {
 	obj := c.GetObject(t)
 	enabler := obj.GetEnabler()
 
-	msg := NewMessageOfType(MessageAcknowledgment, req.GetMessage().MessageID)
-	msg.Token = req.GetMessage().Token
-	msg.Payload = NewEmptyPayload()
+	msg := NewMessageOfType(MessageAcknowledgment, req.GetMessage().GetMessageId(), NewEmptyPayload())
+	//sooskim msg.Token = req.GetMessage().Token
+	//sooskim msg.Payload = NewEmptyPayload()
 
 	if enabler != nil {
 		model := obj.GetDefinition()
 		resource := model.GetResource(LWM2MResourceType(resourceId))
 		if resource == nil {
 			// TODO Write to Object Instance
-			msg.Code = CoapCodeNotFound
+			//sooskim msg.Code = CoapCodeNotFound
 		} else {
 			if !IsWritableResource(resource) {
-				msg.Code = CoapCodeMethodNotAllowed
+				//sooskim msg.Code = CoapCodeMethodNotAllowed
 			} else {
 				lwReq := Default(req, OPERATIONTYPE_WRITE)
 				response := enabler.OnWrite(instanceId, resourceId, lwReq)
-				msg.Code = response.GetResponseCode()
+				//sooskim msg.Code = response.GetResponseCode()
+				msg.AddOption(OptionAccept, response.GetResponseCode()) //sooskim
 			}
 		}
 	} else {
-		msg.Code = CoapCodeNotFound
+		//sooskim msg.Code = CoapCodeNotFound
 	}
 	return NewResponseWithMessage(msg)
 }
 
 // Handles LWM2M Execute Requests
-func (c *DefaultLWM2MClient) handleExecuteRequest(req CoapRequest) CoapResponse {
+func (c *DefaultLWM2MClient) handleExecuteRequest(req CoapRequest) Response {
 	log.Println("Execute Request")
 	attrResource := req.GetAttribute("rsrc")
 	objectId := req.GetAttributeAsInt("obj")
@@ -349,26 +360,27 @@ func (c *DefaultLWM2MClient) handleExecuteRequest(req CoapRequest) CoapResponse 
 	obj := c.GetObject(t)
 	enabler := obj.GetEnabler()
 
-	msg := NewMessageOfType(MessageAcknowledgment, req.GetMessage().MessageID)
-	msg.Token = req.GetMessage().Token
-	msg.Payload = NewEmptyPayload()
+	msg := NewMessageOfType(MessageAcknowledgment, req.GetMessage().GetMessageId(), NewEmptyPayload())
+	//sooskim msg.Token = req.GetMessage().Token
+	//sooskim msg.Payload = NewEmptyPayload()
 
 	if enabler != nil {
 		model := obj.GetDefinition()
 		resource := model.GetResource(LWM2MResourceType(resourceId))
 		if resource == nil {
-			msg.Code = CoapCodeNotFound
+			//sooskim msg.Code = CoapCodeNotFound
 		}
 
 		if !IsExecutableResource(resource) {
-			msg.Code = CoapCodeMethodNotAllowed
+			//sooskim msg.Code = CoapCodeMethodNotAllowed
 		} else {
 			lwReq := Default(req, OPERATIONTYPE_EXECUTE)
 			response := enabler.OnExecute(instanceId, resourceId, lwReq)
-			msg.Code = response.GetResponseCode()
+			//sooskim msg.Code = response.GetResponseCode()
+			msg.AddOption(OptionAccept, response.GetResponseCode()) //sooskim
 		}
 	} else {
-		msg.Code = CoapCodeNotFound
+		//sooskim msg.Code = CoapCodeNotFound
 	}
 	return NewResponseWithMessage(msg)
 }
