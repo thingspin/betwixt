@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/zubairhamed/betwixt",
+	"ImportPath": "github.com/thingspin/betwixt",
 	"GoVersion": "go1.7",
 	"Deps": [
 		{
@@ -16,7 +16,7 @@
 			"Rev": "67106a5111a06241c8d84952c33214675f51a34a"
 		},
 		{
-			"ImportPath": "github.com/zubairhamed/canopus",
+			"ImportPath": "github.com/thingspin/canopus",
 			"Rev": "3b48eb83f65e618976341e213aa3bf4c3d5fbcfc"
 		}
 	]

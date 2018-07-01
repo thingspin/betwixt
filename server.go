@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/zubairhamed/canopus"
+	"github.com/thingspin/canopus"
 )
 
 type ServerConfig map[string]string

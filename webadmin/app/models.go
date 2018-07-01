@@ -1,6 +1,6 @@
 package app
 
-import "github.com/zubairhamed/betwixt"
+import "github.com/thingspin/betwixt"
 
 type StatsModel struct {
 	ClientsCount int

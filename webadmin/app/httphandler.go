@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/zenazn/goji/web"
-	"github.com/zubairhamed/betwixt"
+	"github.com/thingspin/betwixt"
 )
 
 func (b *BetwixtWebApp) fnHttpIndexPage(c web.C, w http.ResponseWriter, r *http.Request) {

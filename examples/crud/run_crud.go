@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/zubairhamed/betwixt"
-	"github.com/zubairhamed/betwixt/examples/objects"
+	"github.com/thingspin/betwixt"
+	"github.com/thingspin/betwixt/examples/objects"
 )
 
 func main() {

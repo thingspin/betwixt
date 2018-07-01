@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/zubairhamed/betwixt"
-	"github.com/zubairhamed/betwixt/examples"
-	"github.com/zubairhamed/betwixt/examples/objects"
+	"github.com/thingspin/betwixt"
+	"github.com/thingspin/betwixt/examples"
+	"github.com/thingspin/betwixt/examples/objects"
 )
 
 func main() {

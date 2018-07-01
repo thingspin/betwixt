@@ -8,7 +8,7 @@ import (
 	"log"
 	"sort"
 
-	"github.com/zubairhamed/canopus"
+	"github.com/thingspin/canopus"
 )
 
 const (

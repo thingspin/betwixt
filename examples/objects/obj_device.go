@@ -3,7 +3,7 @@ package objects
 import (
 	"time"
 
-	. "github.com/zubairhamed/betwixt"
+	. "github.com/thingspin/betwixt"
 )
 
 type DeviceObject struct {

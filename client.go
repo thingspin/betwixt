@@ -3,7 +3,7 @@ package betwixt
 import (
 	"errors"
 	"log"
-	"github.com/zubairhamed/canopus"
+	"github.com/thingspin/canopus"
 )
 
 // NewLWM2MClient instantiates a new instance of LWM2M Client

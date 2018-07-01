@@ -1,4 +1,4 @@
-gom 'github.com/zubairhamed/canopus'
+gom 'github.com/thingspin/canopus'
 gom 'github.com/stretchr/testify/assert'
 gom 'github.com/boltdb/bolt'
 gom 'github.com/zenazn/goji'
