@@ -103,7 +103,7 @@ func (o *DeviceObject) OnRead(instanceId int, resourceId int, req Lwm2mRequest) 
 }
 
 func (o *DeviceObject) OnWrite(instanceId int, resourceId int, req Lwm2mRequest) Lwm2mResponse {
-	val := req.GetMessage().Payload
+	val := req.GetMessage().GetPayload()
 
 	switch resourceId {
 	case 13:
