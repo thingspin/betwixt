@@ -47,7 +47,7 @@ func (c *DefaultLWM2MClient) Register(name string) (string, error) {
 		return "", errors.New("Client name can not exceed 10 characters")
 	}
 
-	req := canopus.NewRequest(canopus.MessageConfirmable, canopus.Post, canopus.GenerateMessageID())
+	req := canopus.NewRequest(canopus.MessageConfirmable, canopus.Post)
 	req.SetStringPayload(BuildModelResourceStringPayload(c.enabledObjects))
 	req.SetRequestURI("/rd")
 	req.SetURIQuery("ep", name)
@@ -84,7 +84,7 @@ func (c *DefaultLWM2MClient) GetRegistry() Registry {
 
 // Unregisters this client from a LWM2M server which was previously registered
 func (c *DefaultLWM2MClient) Deregister() {
-	req := canopus.NewRequest(canopus.MessageConfirmable, canopus.Delete, canopus.GenerateMessageID())
+	req := canopus.NewRequest(canopus.MessageConfirmable, canopus.Delete)
 
 	req.SetRequestURI(c.path)
 	_, err := c.coapServer.Send(req)

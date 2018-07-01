@@ -95,7 +95,7 @@ func (c *DefaultRegisteredClient) ReadResource(obj uint16, inst uint16, rsrc uin
 	rAddr, _ := net.ResolveUDPAddr("udp", c.addr)
 
 	uri := fmt.Sprintf("/%d/%d/%d", obj, inst, rsrc)
-	req := NewRequest(MessageConfirmable, Get, GenerateMessageID())
+	req := NewRequest(MessageConfirmable, Get)
 	req.SetRequestURI(uri)
 
 	resourceDefinition := c.GetObject(LWM2MObjectType(obj)).GetDefinition().GetResource(LWM2MResourceType(rsrc))
