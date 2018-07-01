@@ -1,5 +1,0 @@
-package canopus
-
-func init() {
-
-}

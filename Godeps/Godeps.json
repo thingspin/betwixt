@@ -14,10 +14,6 @@
 			"ImportPath": "github.com/stretchr/testify/assert",
 			"Comment": "v1.0-80-g67106a5",
 			"Rev": "67106a5111a06241c8d84952c33214675f51a34a"
-		},
-		{
-			"ImportPath": "github.com/thingspin/canopus",
-			"Rev": "5e864c6b0bdf26afdc81e83348ed7fcde06f3a0f"
 		}
 	]
 }
