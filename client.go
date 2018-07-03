@@ -7,7 +7,7 @@ import (
 	"github.com/thingspin/canopus"
 )
 
-// NewLWM2MClient instantiates a new instance of LWM2M Client
+// NewLwm2mClient instantiates a new instance of LWM2M Client
 func NewLwm2mClient(name, local, remote string, registry Registry) LWM2MClient {
 	server := canopus.NewServer()
 	conn, _ := canopus.Dial("")
@@ -28,6 +28,7 @@ func NewLwm2mClient(name, local, remote string, registry Registry) LWM2MClient {
 	return c
 }
 
+// DefaultLWM2MClient ;
 type DefaultLWM2MClient struct {
 	coapServer     canopus.CoapServer
 	coapConn       canopus.Connection
@@ -67,7 +68,7 @@ func (c *DefaultLWM2MClient) Register(name string) (string, error) {
 	return path, nil
 }
 
-// Sets/Defines an Enabler for a given LWM2M Object Type
+// SetEnabler ; Sets/Defines an Enabler for a given LWM2M Object Type
 func (c *DefaultLWM2MClient) SetEnabler(t LWM2MObjectType, e ObjectEnabler) {
 	_, ok := c.enabledObjects[t]
 	if ok {
@@ -75,17 +76,17 @@ func (c *DefaultLWM2MClient) SetEnabler(t LWM2MObjectType, e ObjectEnabler) {
 	}
 }
 
-// Returns a list of LWM2M Enabled Objects
+// GetEnabledObjects ; Returns a list of LWM2M Enabled Objects
 func (c *DefaultLWM2MClient) GetEnabledObjects() map[LWM2MObjectType]Object {
 	return c.enabledObjects
 }
 
-// Returns the registry used for looking up LWM2M object type definitions
+// GetRegistry ; Returns the registry used for looking up LWM2M object type definitions
 func (c *DefaultLWM2MClient) GetRegistry() Registry {
 	return c.registry
 }
 
-// Unregisters this client from a LWM2M server which was previously registered
+// Deregister ; Unregisters this client from a LWM2M server which was previously registered
 func (c *DefaultLWM2MClient) Deregister() {
 	req := canopus.NewRequest(canopus.MessageConfirmable, canopus.Delete)
 
@@ -97,23 +98,27 @@ func (c *DefaultLWM2MClient) Deregister() {
 	}
 }
 
+// Update ;
 func (c *DefaultLWM2MClient) Update() {
 
 }
 
+// AddResource ;
 func (c *DefaultLWM2MClient) AddResource() {
 
 }
 
+// AddObject ;
 func (c *DefaultLWM2MClient) AddObject() {
 
 }
 
+// UseRegistry ;
 func (c *DefaultLWM2MClient) UseRegistry(reg Registry) {
 	c.registry = reg
 }
 
-// Registes an object enabler for a given LWM2M object type
+// EnableObject ; Registes an object enabler for a given LWM2M object type
 func (c *DefaultLWM2MClient) EnableObject(t LWM2MObjectType, e ObjectEnabler) error {
 	_, ok := c.enabledObjects[t]
 	if !ok {
@@ -128,7 +133,7 @@ func (c *DefaultLWM2MClient) EnableObject(t LWM2MObjectType, e ObjectEnabler) er
 	}
 }
 
-// Adds a new object instance for a previously enabled LWM2M object type
+// AddObjectInstance ; Adds a new object instance for a previously enabled LWM2M object type
 func (c *DefaultLWM2MClient) AddObjectInstance(t LWM2MObjectType, instance int) error {
 	o := c.enabledObjects[t]
 	if o != nil {
@@ -139,13 +144,14 @@ func (c *DefaultLWM2MClient) AddObjectInstance(t LWM2MObjectType, instance int) 
 	return errors.New("Attempting to add a nil instance")
 }
 
-// Adds a list of object instance for a previously enabled LWM2M object type
+// AddObjectInstances ; Adds a list of object instance for a previously enabled LWM2M object type
 func (c *DefaultLWM2MClient) AddObjectInstances(t LWM2MObjectType, instances ...int) {
 	for _, o := range instances {
 		c.AddObjectInstance(t, o)
 	}
 }
 
+// GetObject ;
 func (c *DefaultLWM2MClient) GetObject(n LWM2MObjectType) Object {
 	return c.enabledObjects[n]
 }
@@ -154,11 +160,12 @@ func (c *DefaultLWM2MClient) validate() {
 
 }
 
-// Starts up the LWM2M client, listens to incoming requests and fires the OnStart event
+// Start up the LWM2M client, listens to incoming requests and fires the OnStart event
 func (c *DefaultLWM2MClient) Start() {
 	c.validate()
 
 	s := c.coapServer
+
 	s.OnStart(func(server canopus.CoapServer) {
 		if c.evtOnStartup != nil {
 			c.evtOnStartup()
@@ -181,6 +188,7 @@ func (c *DefaultLWM2MClient) Start() {
 	s.Post("/:obj/:inst/:rsrc", c.handleExecuteRequest)
 	s.Post("/:obj/:inst", c.handleCreateRequest)
 
+	// sooskim c.coapServer.Start()
 	c.coapServer.ListenAndServe("")
 }
 
@@ -188,16 +196,16 @@ func (c *DefaultLWM2MClient) Start() {
 func (c *DefaultLWM2MClient) handleCreateRequest(req canopus.Request) canopus.Response {
 	log.Println("Create Request")
 	attrResource := req.GetAttribute("rsrc")
-	objectId := req.GetAttributeAsInt("obj")
-	instanceId := req.GetAttributeAsInt("inst")
+	objectID := req.GetAttributeAsInt("obj")
+	instanceID := req.GetAttributeAsInt("inst")
 
-	var resourceId = -1
+	var resourceID = -1
 
 	if attrResource != "" {
-		resourceId = req.GetAttributeAsInt("rsrc")
+		resourceID = req.GetAttributeAsInt("rsrc")
 	}
 
-	t := LWM2MObjectType(objectId)
+	t := LWM2MObjectType(objectID)
 	obj := c.GetObject(t)
 	enabler := obj.GetEnabler()
 
@@ -207,7 +215,7 @@ func (c *DefaultLWM2MClient) handleCreateRequest(req canopus.Request) canopus.Re
 
 	if enabler != nil {
 		lwReq := Default(req, OPERATIONTYPE_CREATE)
-		response := enabler.OnCreate(instanceId, resourceId, lwReq)
+		response := enabler.OnCreate(instanceID, resourceID, lwReq)
 		msg.Code = response.GetResponseCode()
 	} else {
 		msg.Code = canopus.CoapCodeMethodNotAllowed
@@ -218,16 +226,16 @@ func (c *DefaultLWM2MClient) handleCreateRequest(req canopus.Request) canopus.Re
 // Handles LWM2M Read Requests (not to be mistaken for/not the same as  CoAP GET)
 func (c *DefaultLWM2MClient) handleReadRequest(req canopus.Request) canopus.Response {
 	attrResource := req.GetAttribute("rsrc")
-	objectId := req.GetAttributeAsInt("obj")
-	instanceId := req.GetAttributeAsInt("inst")
+	objectID := req.GetAttributeAsInt("obj")
+	instanceID := req.GetAttributeAsInt("inst")
 
-	var resourceId = -1
+	var resourceID = -1
 
 	if attrResource != "" {
-		resourceId = req.GetAttributeAsInt("rsrc")
+		resourceID = req.GetAttributeAsInt("rsrc")
 	}
 
-	t := LWM2MObjectType(objectId)
+	t := LWM2MObjectType(objectID)
 	obj := c.GetObject(t)
 	enabler := obj.GetEnabler()
 
@@ -236,7 +244,7 @@ func (c *DefaultLWM2MClient) handleReadRequest(req canopus.Request) canopus.Resp
 
 	if enabler != nil {
 		model := obj.GetDefinition()
-		resource := model.GetResource(LWM2MResourceType(resourceId))
+		resource := model.GetResource(LWM2MResourceType(resourceID))
 
 		if resource == nil {
 			// TODO: Return TLV of Object Instance
@@ -246,7 +254,7 @@ func (c *DefaultLWM2MClient) handleReadRequest(req canopus.Request) canopus.Resp
 				msg.Code = canopus.CoapCodeMethodNotAllowed
 			} else {
 				lwReq := Default(req, OPERATIONTYPE_READ)
-				response := enabler.OnRead(instanceId, resourceId, lwReq)
+				response := enabler.OnRead(instanceID, resourceID, lwReq)
 
 				val := response.GetResponseValue()
 				msg.Code = response.GetResponseCode()
@@ -265,10 +273,10 @@ func (c *DefaultLWM2MClient) handleReadRequest(req canopus.Request) canopus.Resp
 // Handles LWM2M Delete Requests (not to be mistaken for/not the same as  CoAP DELETE)
 func (c *DefaultLWM2MClient) handleDeleteRequest(req canopus.Request) canopus.Response {
 	log.Println("Delete Request")
-	objectId := req.GetAttributeAsInt("obj")
-	instanceId := req.GetAttributeAsInt("inst")
+	objectID := req.GetAttributeAsInt("obj")
+	instanceID := req.GetAttributeAsInt("inst")
 
-	t := LWM2MObjectType(objectId)
+	t := LWM2MObjectType(objectID)
 	enabler := c.GetObject(t).GetEnabler()
 
 	msg := canopus.NewMessageOfType(canopus.MessageAcknowledgment, req.GetMessage().GetMessageId(), canopus.NewEmptyPayload()).(*canopus.CoapMessage)
@@ -277,7 +285,7 @@ func (c *DefaultLWM2MClient) handleDeleteRequest(req canopus.Request) canopus.Re
 	if enabler != nil {
 		lwReq := Default(req, OPERATIONTYPE_DELETE)
 
-		response := enabler.OnDelete(instanceId, lwReq)
+		response := enabler.OnDelete(instanceID, lwReq)
 		msg.Code = response.GetResponseCode()
 	} else {
 		msg.Code = canopus.CoapCodeMethodNotAllowed
@@ -297,16 +305,16 @@ func (c *DefaultLWM2MClient) handleObserveRequest() {
 func (c *DefaultLWM2MClient) handleWriteRequest(req canopus.Request) canopus.Response {
 	log.Println("Write Request")
 	attrResource := req.GetAttribute("rsrc")
-	objectId := req.GetAttributeAsInt("obj")
-	instanceId := req.GetAttributeAsInt("inst")
+	objectID := req.GetAttributeAsInt("obj")
+	instanceID := req.GetAttributeAsInt("inst")
 
-	var resourceId = -1
+	var resourceID = -1
 
 	if attrResource != "" {
-		resourceId = req.GetAttributeAsInt("rsrc")
+		resourceID = req.GetAttributeAsInt("rsrc")
 	}
 
-	t := LWM2MObjectType(objectId)
+	t := LWM2MObjectType(objectID)
 	obj := c.GetObject(t)
 	enabler := obj.GetEnabler()
 
@@ -315,7 +323,7 @@ func (c *DefaultLWM2MClient) handleWriteRequest(req canopus.Request) canopus.Res
 
 	if enabler != nil {
 		model := obj.GetDefinition()
-		resource := model.GetResource(LWM2MResourceType(resourceId))
+		resource := model.GetResource(LWM2MResourceType(resourceID))
 		if resource == nil {
 			// TODO Write to Object Instance
 			msg.Code = canopus.CoapCodeNotFound
@@ -324,7 +332,7 @@ func (c *DefaultLWM2MClient) handleWriteRequest(req canopus.Request) canopus.Res
 				msg.Code = canopus.CoapCodeMethodNotAllowed
 			} else {
 				lwReq := Default(req, OPERATIONTYPE_WRITE)
-				response := enabler.OnWrite(instanceId, resourceId, lwReq)
+				response := enabler.OnWrite(instanceID, resourceID, lwReq)
 				msg.Code = response.GetResponseCode()
 			}
 		}
@@ -338,16 +346,16 @@ func (c *DefaultLWM2MClient) handleWriteRequest(req canopus.Request) canopus.Res
 func (c *DefaultLWM2MClient) handleExecuteRequest(req canopus.Request) canopus.Response {
 	log.Println("Execute Request")
 	attrResource := req.GetAttribute("rsrc")
-	objectId := req.GetAttributeAsInt("obj")
-	instanceId := req.GetAttributeAsInt("inst")
+	objectID := req.GetAttributeAsInt("obj")
+	instanceID := req.GetAttributeAsInt("inst")
 
-	var resourceId = -1
+	var resourceID = -1
 
 	if attrResource != "" {
-		resourceId = req.GetAttributeAsInt("rsrc")
+		resourceID = req.GetAttributeAsInt("rsrc")
 	}
 
-	t := LWM2MObjectType(objectId)
+	t := LWM2MObjectType(objectID)
 	obj := c.GetObject(t)
 	enabler := obj.GetEnabler()
 
@@ -356,7 +364,7 @@ func (c *DefaultLWM2MClient) handleExecuteRequest(req canopus.Request) canopus.R
 
 	if enabler != nil {
 		model := obj.GetDefinition()
-		resource := model.GetResource(LWM2MResourceType(resourceId))
+		resource := model.GetResource(LWM2MResourceType(resourceID))
 		if resource == nil {
 			msg.Code = canopus.CoapCodeNotFound
 		}
@@ -365,7 +373,7 @@ func (c *DefaultLWM2MClient) handleExecuteRequest(req canopus.Request) canopus.R
 			msg.Code = canopus.CoapCodeMethodNotAllowed
 		} else {
 			lwReq := Default(req, OPERATIONTYPE_EXECUTE)
-			response := enabler.OnExecute(instanceId, resourceId, lwReq)
+			response := enabler.OnExecute(instanceID, resourceID, lwReq)
 			msg.Code = response.GetResponseCode()
 		}
 	} else {

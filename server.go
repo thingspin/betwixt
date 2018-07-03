@@ -46,6 +46,7 @@ func (c *LWM2MServer) OnDeregistered(fn FnOnDeregistered) {
 }
 
 func (b *LWM2MServer) Serve() error {
+
 	b.CoapServer.OnMessage(func(msg canopus.Message, inbound bool) {
 		b.Stats.IncrementCoapRequestsCount()
 	})
@@ -54,15 +55,14 @@ func (b *LWM2MServer) Serve() error {
 	b.CoapServer.Put("/rd/:id", FnCoapUpdateClient(b))
 	b.CoapServer.Delete("/rd/:id", FnCoapDeleteClient(b))
 
-	go b.CoapServer.ListenAndServe(":5683")
+	addr := b.Config["addr"]
+
+	go b.CoapServer.ListenAndServe(addr)
 
 	return nil
 }
 
 func (b *LWM2MServer) Register(ep string, addr string, resources []*canopus.CoreResource) (string, error) {
-
-	log.Println("server.Register", ep, addr)
-
 	clientId := canopus.GenerateToken(8)
 	cli := NewRegisteredClient(ep, clientId, addr, b.CoapServer, b.CoapConn)
 
@@ -108,7 +108,6 @@ func (b *LWM2MServer) Update(id string) {
 }
 
 func (b *LWM2MServer) UseRegistry(reg Registry) {
-	log.Println("server.UseRegistry")
 	b.Registry = reg
 }
 
@@ -181,7 +180,6 @@ type BetwixtServerStatistics struct {
 }
 
 func (s *BetwixtServerStatistics) IncrementCoapRequestsCount() {
-	log.Println("server.IncrementCoapRequestsCount")
 	s.requestCount++
 }
 
