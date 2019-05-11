@@ -7,9 +7,19 @@ import (
 	"log"
 	"strings"
 
-	"github.com/zenazn/goji"
 	"github.com/thingspin/betwixt"
+	"github.com/zenazn/goji"
 )
+
+func SetWebApp(store betwixt.Store, server *betwixt.LWM2MServer, port string) *BetwixtWebApp {
+
+	w := &BetwixtWebApp{
+		server:   server,
+		httpPort: port,
+	}
+
+	return w
+}
 
 func NewWebApp(store betwixt.Store, cfg betwixt.ServerConfig) *BetwixtWebApp {
 
